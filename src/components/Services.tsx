@@ -15,6 +15,7 @@ interface Service {
 
 const Services: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState<Boolean>(true)
   const { userRole } = useAuth();
 
 
@@ -31,11 +32,25 @@ const Services: React.FC = () => {
         setServices(service_data);
       } catch (error) {
         console.error('Failed to fetch services:', error);
+      } finally {
+
+         setLoading(false)
       }
     };
 
     fetchServices();
   }, []);
+
+
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="p-4">

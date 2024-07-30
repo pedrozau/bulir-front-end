@@ -6,6 +6,7 @@ import api from '../api';
 const Profile: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const { userRole } = useAuth();
 
   useEffect(() => {
@@ -21,11 +22,26 @@ const Profile: React.FC = () => {
         setTransactions(transactionsResponse.data);
       } catch (error) {
         console.error('Failed to fetch user data or transactions:', error);
+      } finally {
+          
+        setLoading(false)
+
       }
     };
 
     fetchUserData();
   }, []);
+
+   
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="p-4">
