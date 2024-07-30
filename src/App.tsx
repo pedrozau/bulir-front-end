@@ -7,6 +7,7 @@ import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 import { ServicesPage } from "./pages/ServicesPage"
 import { ProfilePage } from "./pages/ProfilePage"
+import { SettingsPage } from "./pages/SettingsPage"
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       <Route path="/" element={<ProtectedRoute element={<Home/>}/>} />
       <Route path="/services" element={<ProtectedRoute element={<ServicesPage/>}/>} />
       <Route path="/profile" element={<ProtectedRoute element={<ProfilePage/>}/>} />
+      <Route path="/settings" element={<ProtectedRoute element={<SettingsPage/>}/>} />
       <Route path="/login" element={<Login/>} />
       <Route path="/register" element={<RegisterPage/>} />
       <Route path="*" element={<NotFoundPage/>}></Route>

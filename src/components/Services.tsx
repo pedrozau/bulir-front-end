@@ -19,9 +19,8 @@ const Services: React.FC = () => {
   const { userRole } = useAuth();
 
 
-  console.log(userRole)
-
   const providerId = localStorage.getItem('providerId')
+  const userId = localStorage.getItem('userId')
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -75,7 +74,7 @@ const Services: React.FC = () => {
         <div>
           <h2 className="text-2xl font-bold mb-4">Your Services</h2>
           <ul>
-            {services.filter(service => service.providerId == providerId).map((service) => (
+            {services.filter(service => service.providerId === userId).map((service) => (
               <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold">{service.title}</h3>
                 <p>{service.description}</p>

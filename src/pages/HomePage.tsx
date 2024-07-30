@@ -1,10 +1,11 @@
 import Layout from "../components/Layout";
+import Services from "../components/Services";
 
 export default function HomePage() {
   return (
      <>
       <Layout>
-         <h1>Hello</h1>
+         <Services></Services>
       </Layout>
      </>
   );

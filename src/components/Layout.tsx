@@ -1,21 +1,27 @@
 import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaCogs, FaUser, FaServicestack, FaSearch, FaChevronLeft, FaChevronRight, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 const Layout = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
+  const {logout} = useAuth()
+ 
+
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
-  const handleLogout = () => {
-    // Clear user authentication tokens or any session data here
-    // For example: localStorage.removeItem('authToken');
-
-    // Redirect to login page
+  const handleLogout = () => { 
+   
     navigate('/login');
+
+    logout()
+
+
+    
   };
 
   return (
