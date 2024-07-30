@@ -65,7 +65,7 @@ const Layout = (props: { children: string | number | boolean | ReactElement<any,
 
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-blue-600 text-white p-4 shadow-md flex items-center">
+        <header className="bg-blue-600 text-gray p-4 shadow-md flex items-center">
           <h1 className="text-xl font-bold flex-1">Service Platform</h1>
           <div className="relative flex items-center">
             <input 

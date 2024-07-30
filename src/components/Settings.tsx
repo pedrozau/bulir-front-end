@@ -1,19 +1,21 @@
 // src/pages/SettingsPage.tsx
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { useAuth } from '../context/AuthContext';
+import BalanceModal from '../components/BalanceModal';
 
 const Settings: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>({ fullname: '', email: '' });
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
-  //const { userId } = useAuth(); // Presume que você tem o userId no contexto
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get(`api/user/getById/{userId}`);
+        const response = await api.get(`api/user/getById/${userId}`);
         setUserInfo(response.data);
       } catch (error) {
         console.error('Failed to fetch user info:', error);
@@ -23,7 +25,7 @@ const Settings: React.FC = () => {
     };
 
     fetchUserInfo();
-  }, []);
+  }, [userId]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +39,20 @@ const Settings: React.FC = () => {
       const updatedData = { ...userInfo };
       if (password) updatedData.password = password;
 
-      await api.put(`api/user/update/{userId}`, updatedData);
+      await api.put(`api/user/update/${userId}`, updatedData);
       alert('Information updated successfully.');
     } catch (error) {
       console.error('Failed to update user info:', error);
     }
+  };
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleSaveBalance = async (balance: number) => {
+    // Implement the logic to update the balance
+    console.log('Balance to be updated:', balance);
+    // Call the API to update balance here
   };
 
   if (loading) {
@@ -106,7 +117,18 @@ const Settings: React.FC = () => {
             Update Information
           </button>
         </form>
+        <button
+          onClick={handleOpenModal}
+          className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          Update Balance
+        </button>
       </div>
+      <BalanceModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={handleSaveBalance}
+      />
     </div>
   );
 };
