@@ -78,7 +78,7 @@ const Profile: React.FC = () => {
           <p><strong>Name:</strong> {userInfo.fullname}</p>
           <p><strong>Email:</strong> {userInfo.email}</p>
           <p><strong>NIF:</strong> {userInfo.nif}</p>
-          <p><strong>Balance:</strong>${userInfo.balance}</p>
+          <p><strong>Balance:</strong>${Math.abs(userInfo.balance)}</p>
           {userRole === 'prestador' && (
             <>
               <p><strong>Provider ID:</strong> {userInfo.id}</p>
