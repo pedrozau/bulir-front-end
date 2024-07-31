@@ -67,4 +67,4 @@ Este projeto está licenciado sob a [Licença MIT](LICENSE).
 
 ## Contato
 
-Se você tiver alguma dúvida, sinta-se à vontade para me contatar em [seu-email@dominio.com](mailto:pedrozau28@gmail.com).
+Se você tiver alguma dúvida, sinta-se à vontade para me contatar em [pedrozau28@gmail.com](mailto:pedrozau28@gmail.com).
