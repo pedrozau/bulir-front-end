@@ -61,8 +61,8 @@ const Services: React.FC = () => {
             handleShowAlert('Service hired successfully!', 'success');
         } catch (error) {
             console.error('Failed to hire service:', error);
-            setError('Failed to hire service.');
-            handleShowAlert('Failed to hire service.', 'error');
+            setError('Insufficient balance');
+            handleShowAlert('Insufficient balance', 'error');
         }
     };
 
