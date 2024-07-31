@@ -21,7 +21,6 @@ Aqui estão algumas capturas de tela do projeto:
 ## Tecnologias Utilizadas
 
 - [React](https://reactjs.org/)
-- [Next.js](https://nextjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
