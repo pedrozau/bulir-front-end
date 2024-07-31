@@ -24,7 +24,6 @@ const Services: React.FC = () => {
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
     const { userRole } = useAuth();
-
     const userId = localStorage.getItem('userId');
 
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
@@ -51,9 +50,29 @@ const Services: React.FC = () => {
         fetchServices();
     }, []);
 
-    const handleHireService = async (serviceId: string) => {
+    const checkUserBalance = async (servicePrice: number) => {
         try {
-            const response = await api.post('api/service/hire', {
+            const response = await api.get('api/service/checkBalance', {
+                params: { userId }
+            });
+            return response.data.balance >= servicePrice;
+        } catch (error) {
+            console.error('Failed to check balance:', error);
+            handleShowAlert('Failed to check balance.', 'error');
+            return false;
+        }
+    };
+
+    const handleHireService = async (serviceId: string, servicePrice: number) => {
+        const hasSufficientBalance = await checkUserBalance(servicePrice);
+
+        if (!hasSufficientBalance) {
+            handleShowAlert('Insufficient balance', 'error');
+            return;
+        }
+
+        try {
+            await api.post('api/service/hire', {
                 userId,
                 serviceId,
             });
@@ -61,8 +80,7 @@ const Services: React.FC = () => {
             handleShowAlert('Service hired successfully!', 'success');
         } catch (error) {
             console.error('Failed to hire service:', error);
-            setError('Insufficient balance');
-            handleShowAlert('Insufficient balance', 'error');
+            handleShowAlert('Failed to hire service.', 'error');
         }
     };
 
@@ -79,7 +97,6 @@ const Services: React.FC = () => {
             handleShowAlert('Service deleted successfully!', 'success');
         } catch (error) {
             console.error('Failed to delete service:', error);
-            setError('Failed to delete service.');
             handleShowAlert('Failed to delete service.', 'error');
         }
     };
@@ -94,7 +111,6 @@ const Services: React.FC = () => {
             handleShowAlert('Service updated successfully!', 'success');
         } catch (error) {
             console.error('Failed to update service:', error);
-            setError('Failed to update service.');
             handleShowAlert('Failed to update service.', 'error');
         } finally {
             setEditModalOpen(false);
@@ -133,7 +149,7 @@ const Services: React.FC = () => {
                                 <p>{service.description}</p>
                                 <p className="text-gray-600">Price: ${service.price}</p>
                                 <button
-                                    onClick={() => handleHireService(service.id)}
+                                    onClick={() => handleHireService(service.id, service.price)}
                                     className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                                     Hire Service
                                 </button>
