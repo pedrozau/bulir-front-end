@@ -179,7 +179,7 @@ const Profile: React.FC = () => {
                 <p><strong>Service:</strong> {transaction.service.title}</p>
                 {/* <p><strong>Provider:</strong> {transaction.providerName}</p> */}
                 <p><strong>Amount:</strong> ${transaction.amount}</p>
-                <p><strong>Date:</strong> {new Date(transaction.date).toLocaleDateString()}</p>
+                <p><strong>Date:</strong> {new Date(transaction.data).toLocaleDateString()}</p>
               </li>
             ))}
           </ul>
