@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import BalanceModal from '../components/BalanceModal';
+import { Alert } from '../components/Alert';
 
 const Settings: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>({ fullname: '', email: '' });
@@ -9,6 +10,9 @@ const Settings: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
 
   const userId = localStorage.getItem('userId');
 
@@ -19,6 +23,9 @@ const Settings: React.FC = () => {
         setUserInfo(response.data);
       } catch (error) {
         console.error('Failed to fetch user info:', error);
+        setAlertMessage('Failed to fetch user info.');
+        setAlertType('error');
+        setShowAlert(true);
       } finally {
         setLoading(false);
       }
@@ -31,7 +38,9 @@ const Settings: React.FC = () => {
     e.preventDefault();
 
     if (password && password !== confirmPassword) {
-      alert('Passwords do not match.');
+      setAlertMessage('Passwords do not match.');
+      setAlertType('error');
+      setShowAlert(true);
       return;
     }
 
@@ -40,9 +49,14 @@ const Settings: React.FC = () => {
       if (password) updatedData.password = password;
 
       await api.put(`api/user/update/${userId}`, updatedData);
-      alert('Information updated successfully.');
+      setAlertMessage('Information updated successfully.');
+      setAlertType('success');
+      setShowAlert(true);
     } catch (error) {
       console.error('Failed to update user info:', error);
+      setAlertMessage('Failed to update user info.');
+      setAlertType('error');
+      setShowAlert(true);
     }
   };
 
@@ -50,9 +64,20 @@ const Settings: React.FC = () => {
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleSaveBalance = async (balance: number) => {
-    // Implement the logic to update the balance
-    console.log('Balance to be updated:', balance);
-    // Call the API to update balance here
+    try {
+      // Implement the logic to update the balance
+      console.log('Balance to be updated:', balance);
+      // Call the API to update balance here
+      // Simulate successful balance update
+      setAlertMessage('Balance updated successfully.');
+      setAlertType('success');
+      setShowAlert(true);
+    } catch (error) {
+      console.error('Failed to update balance:', error);
+      setAlertMessage('Failed to update balance.');
+      setAlertType('error');
+      setShowAlert(true);
+    }
   };
 
   if (loading) {
@@ -65,6 +90,15 @@ const Settings: React.FC = () => {
 
   return (
     <div className="p-4">
+      {/* Alerta */}
+      {showAlert && alertMessage && (
+        <Alert 
+          message={alertMessage} 
+          type={alertType}
+          onClose={() => setShowAlert(false)} 
+        />
+      )}
+
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Settings</h2>
         <form onSubmit={handleUpdate}>

@@ -2,16 +2,20 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
+import { Alert } from '../components/Alert';
 
 const Profile: React.FC = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [title, setTitle] = useState('') 
-  const [description,setDescription] = useState('')
-  const [price, setPrice] = useState(0)
-  const [providerId, setproviderId] = useState('');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState(0);
+  const [providerId, setProviderId] = useState('');
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
   const { userRole } = useAuth();
 
   useEffect(() => {
@@ -38,22 +42,27 @@ const Profile: React.FC = () => {
     try {
       const userId = localStorage.getItem('userId');
 
-      
-
       if (userId) {
-         
-        console.log(userId)
-        setproviderId(userId)
+        setProviderId(userId);
 
-        await api.post('api/service/create', { title, description, price, providerId  });
+        await api.post('api/service/create', { title, description, price, providerId });
+        setAlertMessage('Service created successfully!');
+        setAlertType('success');
+        setShowAlert(true);
         // Reset form and hide modal after submission
         setIsModalOpen(false);
         // Optionally, refetch services or show a success message
       } else {
         console.error('User ID not found');
+        setAlertMessage('User ID not found.');
+        setAlertType('error');
+        setShowAlert(true);
       }
     } catch (error) {
       console.error('Failed to create service:', error);
+      setAlertMessage('Failed to create service.');
+      setAlertType('error');
+      setShowAlert(true);
     }
   };
 
@@ -71,6 +80,15 @@ const Profile: React.FC = () => {
 
   return (
     <div className="p-4">
+      {/* Alerta */}
+      {showAlert && alertMessage && (
+        <Alert 
+          message={alertMessage} 
+          type={alertType}
+          onClose={() => setShowAlert(false)} 
+        />
+      )}
+
       {/* Informações do Usuário */}
       {userInfo && (
         <div className="mb-8 p-6 bg-white shadow-lg rounded-lg">
@@ -105,7 +123,7 @@ const Profile: React.FC = () => {
                   type="text"
                   id="title"
                   value={title}
-                  onChange={(e) =>  setTitle(e.target.value) }
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full border-gray-300 border rounded-lg p-2"
                   required
                 />
@@ -115,7 +133,7 @@ const Profile: React.FC = () => {
                 <textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value) }
+                  onChange={(e) => setDescription(e.target.value)}
                   className="w-full border-gray-300 border rounded-lg p-2"
                   required
                 />
@@ -126,7 +144,8 @@ const Profile: React.FC = () => {
                   type="number"
                   id="price"
                   value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}                  className="w-full border-gray-300 border rounded-lg p-2"
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  className="w-full border-gray-300 border rounded-lg p-2"
                   required
                 />
               </div>
@@ -157,8 +176,8 @@ const Profile: React.FC = () => {
           <ul>
             {transactions.map((transaction) => (
               <li key={transaction.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                <p><strong>Service:</strong> {transaction.serviceTitle}</p>
-                <p><strong>Provider:</strong> {transaction.providerName}</p>
+                <p><strong>Service:</strong> {transaction.service.title}</p>
+                {/* <p><strong>Provider:</strong> {transaction.providerName}</p> */}
                 <p><strong>Amount:</strong> ${transaction.amount}</p>
                 <p><strong>Date:</strong> {new Date(transaction.date).toLocaleDateString()}</p>
               </li>

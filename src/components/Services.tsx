@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
+import { Alert } from '../components/Alert';
 
 interface Service {
     id: string;
@@ -17,8 +18,21 @@ const Services: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+    const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
+    const [showAlert, setShowAlert] = useState<boolean>(false);
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
     const { userRole } = useAuth();
+
     const userId = localStorage.getItem('userId');
+
+    const handleShowAlert = (message: string, type: 'success' | 'error') => {
+        setAlertMessage(message);
+        setAlertType(type);
+        setShowAlert(true);
+        setTimeout(() => setShowAlert(false), 3000); // Fechar o alerta após 3 segundos
+    };
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -28,6 +42,7 @@ const Services: React.FC = () => {
             } catch (error) {
                 console.error('Failed to fetch services:', error);
                 setError('Failed to fetch services.');
+                handleShowAlert('Failed to fetch services.', 'error');
             } finally {
                 setLoading(false);
             }
@@ -42,11 +57,48 @@ const Services: React.FC = () => {
                 userId,
                 serviceId,
             });
-            console.log(response.data)
             setSuccessMessage('Service hired successfully!');
+            handleShowAlert('Service hired successfully!', 'success');
         } catch (error) {
             console.error('Failed to hire service:', error);
             setError('Failed to hire service.');
+            handleShowAlert('Failed to hire service.', 'error');
+        }
+    };
+
+    const handleEditService = (service: Service) => {
+        setServiceToEdit(service);
+        setEditModalOpen(true);
+    };
+
+    const handleDeleteService = async (serviceId: string) => {
+        try {
+            await api.delete(`api/service/delete/${serviceId}`);
+            setServices(services.filter(service => service.id !== serviceId));
+            setSuccessMessage('Service deleted successfully!');
+            handleShowAlert('Service deleted successfully!', 'success');
+        } catch (error) {
+            console.error('Failed to delete service:', error);
+            setError('Failed to delete service.');
+            handleShowAlert('Failed to delete service.', 'error');
+        }
+    };
+
+    const handleUpdateService = async () => {
+        if (!serviceToEdit) return;
+
+        try {
+            await api.put(`api/service/update/${serviceToEdit.id}`, serviceToEdit);
+            setServices(services.map(service => service.id === serviceToEdit.id ? serviceToEdit : service));
+            setSuccessMessage('Service updated successfully!');
+            handleShowAlert('Service updated successfully!', 'success');
+        } catch (error) {
+            console.error('Failed to update service:', error);
+            setError('Failed to update service.');
+            handleShowAlert('Failed to update service.', 'error');
+        } finally {
+            setEditModalOpen(false);
+            setServiceToEdit(null);
         }
     };
 
@@ -62,6 +114,14 @@ const Services: React.FC = () => {
         <div className="p-4">
             {error && <p className="text-red-600">{error}</p>}
             {successMessage && <p className="text-green-600">{successMessage}</p>}
+
+            {showAlert && alertMessage && (
+                <Alert 
+                    message={alertMessage} 
+                    type={alertType}
+                    onClose={() => setShowAlert(false)} 
+                />
+            )}
 
             {userRole === 'cliente' ? (
                 <div>
@@ -90,10 +150,14 @@ const Services: React.FC = () => {
                                 <h3 className="text-xl font-semibold">{service.title}</h3>
                                 <p>{service.description}</p>
                                 <p className="text-gray-600">Price: ${service.price}</p>
-                                <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                <button
+                                    onClick={() => handleEditService(service)}
+                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                                     Edit Service
                                 </button>
-                                <button className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                <button
+                                    onClick={() => handleDeleteService(service.id)}
+                                    className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                                     Delete Service
                                 </button>
                             </li>
@@ -102,6 +166,62 @@ const Services: React.FC = () => {
                 </div>
             ) : (
                 <p className="text-center text-gray-600">You are not authorized to view this content.</p>
+            )}
+
+            {/* Edit Service Modal */}
+            {editModalOpen && serviceToEdit && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+                        <h2 className="text-2xl font-bold mb-4">Edit Service</h2>
+                        <form onSubmit={(e) => { e.preventDefault(); handleUpdateService(); }}>
+                            <div className="mb-4">
+                                <label htmlFor="title" className="block text-gray-700">Title:</label>
+                                <input
+                                    id="title"
+                                    type="text"
+                                    value={serviceToEdit.title}
+                                    onChange={(e) => setServiceToEdit({ ...serviceToEdit, title: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    placeholder="Enter service title"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="description" className="block text-gray-700">Description:</label>
+                                <textarea
+                                    id="description"
+                                    value={serviceToEdit.description}
+                                    onChange={(e) => setServiceToEdit({ ...serviceToEdit, description: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    placeholder="Enter service description"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label htmlFor="price" className="block text-gray-700">Price:</label>
+                                <input
+                                    id="price"
+                                    type="number"
+                                    value={serviceToEdit.price}
+                                    onChange={(e) => setServiceToEdit({ ...serviceToEdit, price: Number(e.target.value) })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    placeholder="Enter service price"
+                                />
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditModalOpen(false)}
+                                    className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             )}
         </div>
     );
