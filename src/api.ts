@@ -11,7 +11,7 @@ api.interceptors.request.use(
   (config) => {
     // Acessar o token do localStorage
     const token = localStorage.getItem('token');
-     console.log(token)
+    
     // Se o token estiver presente, adicione-o ao cabeçalho da solicitação
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
