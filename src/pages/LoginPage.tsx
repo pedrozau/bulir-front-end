@@ -8,23 +8,28 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const {login} = useAuth()
-  const navegate  = useNavigate()
+  const [loading, setLoading] = useState(false); // Adicionado estado de carregamento
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-     try {
-       const response = await api.post('/api/auth/signin', { email, password });
-       localStorage.setItem('userId', response.data.user.id)
-       localStorage.setItem('providerId',response.data.user.providerId);
-       login(response.data.access_token,response.data.user.role);
-       navegate('/')
+    setLoading(true); // Iniciar carregamento
 
-       
-        
-     } catch (error) {
-       setError('Invalid email or password');
-       console.error('Login failed:', error);
+    try {
+      const response = await api.post('/api/auth/signin', { email, password });
+      localStorage.setItem('userId', response.data.user.id);
+      localStorage.setItem('providerId', response.data.user.providerId);
+      login(response.data.access_token, response.data.user.role);
+
+      setTimeout(() => {
+        navigate('/');
+      }, 500); // Redireciona após um pequeno atraso para mostrar o carregamento
+    } catch (error) {
+      setError('Invalid email or password');
+      console.error('Login failed:', error);
+    } finally {
+      setLoading(false); // Parar carregamento
     }
   };
 
@@ -32,7 +37,7 @@ const LoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">Login</h2>
-         {error && <p className="text-red-500 text-center mb-4">{error}</p>} 
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -59,8 +64,15 @@ const LoginPage = () => {
           <button
             type="submit"
             className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={loading} // Desativa o botão enquanto carrega
           >
-            Login
+            {loading ? (
+              <div className="flex justify-center items-center">
+                <div className="w-5 h-5 border-4 border-white border-t-transparent border-solid rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
         <div className="mt-4 text-center">
