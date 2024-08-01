@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import { Alert } from '../components/Alert';
+import { useSearch } from '../context/SearchContext';
 
 interface Service {
     id: string;
@@ -22,16 +23,31 @@ const Services: React.FC = () => {
     const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
-    const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
+    const [alertType, setAlertType] = useState<'success' | 'error'>('success');
     const { userRole } = useAuth();
+    const { searchTerm } = useSearch();
     const userId = localStorage.getItem('userId');
 
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
         setAlertMessage(message);
         setAlertType(type);
         setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 3000); // Fechar o alerta após 3 segundos
+        setTimeout(() => setShowAlert(false), 3000);
     };
+
+    useEffect(() => {
+        const fetchServices = async () => {
+          try {
+            const response = await api.get(`api/service/search/${searchTerm}`);
+            console.log(response.data)
+            setServices(response.data);
+          } catch (error) {
+            console.error('Failed to fetch services:', error);
+          }
+        };
+    
+        fetchServices();
+      }, []);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -142,43 +158,47 @@ const Services: React.FC = () => {
             {userRole === 'cliente' ? (
                 <div>
                     <h2 className="text-2xl font-bold mb-4">Available Services</h2>
-                    <ul>
-                        {services.map((service) => (
-                            <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                                <h3 className="text-xl font-semibold">{service.title}</h3>
-                                <p>{service.description}</p>
-                                <p className="text-gray-600">Price: ${service.price}</p>
-                                <button
-                                    onClick={() => handleHireService(service.id, service.price)}
-                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Hire Service
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                        <ul>
+                            {services.map((service) => (
+                                <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                                    <h3 className="text-xl font-semibold">{service.title}</h3>
+                                    <p>{service.description}</p>
+                                    <p className="text-gray-600">Price: ${service.price}</p>
+                                    <button
+                                        onClick={() => handleHireService(service.id, service.price)}
+                                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                        Hire Service
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             ) : userRole === 'prestador' ? (
                 <div>
                     <h2 className="text-2xl font-bold mb-4">Your Services</h2>
-                    <ul>
-                        {services.filter(service => service.providerId === userId).map((service) => (
-                            <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                                <h3 className="text-xl font-semibold">{service.title}</h3>
-                                <p>{service.description}</p>
-                                <p className="text-gray-600">Price: ${service.price}</p>
-                                <button
-                                    onClick={() => handleEditService(service)}
-                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Edit Service
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteService(service.id)}
-                                    className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                                    Delete Service
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                        <ul>
+                            {services.filter(service => service.providerId === userId).map((service) => (
+                                <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                                    <h3 className="text-xl font-semibold">{service.title}</h3>
+                                    <p>{service.description}</p>
+                                    <p className="text-gray-600">Price: ${service.price}</p>
+                                    <button
+                                        onClick={() => handleEditService(service)}
+                                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                        Edit Service
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteService(service.id)}
+                                        className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                        Delete Service
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             ) : (
                 <p className="text-center text-gray-600">You are not authorized to view this content.</p>

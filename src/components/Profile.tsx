@@ -17,6 +17,7 @@ const Profile: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
   const { userRole } = useAuth();
+  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -40,8 +41,6 @@ const Profile: React.FC = () => {
   const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const userId = localStorage.getItem('userId');
-
       if (userId) {
         setProviderId(userId);
 
@@ -173,16 +172,18 @@ const Profile: React.FC = () => {
       {transactions.length > 0 ? (
         <div className="p-6 bg-white shadow-lg rounded-lg">
           <h2 className="text-2xl font-bold mb-4">Transaction History</h2>
-          <ul>
-            {transactions.map((transaction) => (
-              <li key={transaction.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                <p><strong>Service:</strong> {transaction.service.title}</p>
-                {/* <p><strong>Provider:</strong> {transaction.providerName}</p> */}
-                <p><strong>Amount:</strong> ${transaction.amount}</p>
-                <p><strong>Date:</strong> {new Date(transaction.data).toLocaleDateString()}</p>
-              </li>
-            ))}
-          </ul>
+          <div className="max-h-[calc(100vh-15rem)] overflow-y-auto">
+            <ul>
+              {transactions.map((transaction) => (
+                <li key={transaction.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                  <p><strong>Service:</strong> {transaction.service.title}</p>
+                  {/* <p><strong>Provider:</strong> {transaction.providerName}</p> */}
+                  <p><strong>Amount:</strong> ${transaction.amount}</p>
+                  <p><strong>Date:</strong> {new Date(transaction.data).toLocaleDateString()}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : (
         <p className="text-center text-gray-600">No transactions found.</p>

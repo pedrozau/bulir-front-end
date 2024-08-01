@@ -2,12 +2,14 @@ import { JSXElementConstructor, ReactElement, ReactNode, ReactPortal, useState }
 import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaCogs, FaUser, FaServicestack, FaSearch, FaChevronLeft, FaChevronRight, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { useSearch } from '../context/SearchContext';
 
 const Layout = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | null | undefined; }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
   const {logout} = useAuth()
+  const { searchTerm, setSearchTerm } = useSearch();
  
 
   const toggleSidebar = () => {
@@ -68,8 +70,10 @@ const Layout = (props: { children: string | number | boolean | ReactElement<any,
         <header className="bg-blue-600 text-gray p-4 shadow-md flex items-center">
           <h1 className="text-xl font-bold flex-1">Service Platform</h1>
           <div className="relative flex items-center">
-            <input 
+          <input 
               type="text" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..." 
               className="pl-8 py-1 rounded bg-white border border-gray-300"
             />
