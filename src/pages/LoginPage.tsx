@@ -3,18 +3,20 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { Alert } from '../components/Alert'; 
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Adicionado estado de carregamento
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); // Iniciar carregamento
+    setLoading(true);
 
     try {
       const response = await api.post('/api/auth/signin', { email, password });
@@ -22,14 +24,15 @@ const LoginPage = () => {
       localStorage.setItem('providerId', response.data.user.providerId);
       login(response.data.access_token, response.data.user.role);
 
+      setSuccessMessage('Login successful!');
       setTimeout(() => {
         navigate('/');
-      }, 500); // Redireciona após um pequeno atraso para mostrar o carregamento
+      }, 500);
     } catch (error) {
       setError('Invalid email or password');
       console.error('Login failed:', error);
     } finally {
-      setLoading(false); // Parar carregamento
+      setLoading(false);
     }
   };
 
@@ -37,7 +40,8 @@ const LoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-sm p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">Login</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {error && <Alert message={error} type="error" onClose={() => setError('')} />}
+        {successMessage && <Alert message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -64,7 +68,7 @@ const LoginPage = () => {
           <button
             type="submit"
             className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            disabled={loading} // Desativa o botão enquanto carrega
+            disabled={loading}
           >
             {loading ? (
               <div className="flex justify-center items-center">
