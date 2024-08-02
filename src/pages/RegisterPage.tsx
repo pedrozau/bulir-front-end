@@ -1,6 +1,8 @@
+// src/pages/RegisterPage.tsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import {Alert} from '../components/Alert'; // Importe o Toast
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -9,8 +11,8 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('cliente'); // Default role
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,9 +21,9 @@ const RegisterPage = () => {
       return;
     }
     try {
-      await api.post('api/user/create', { fullname:name, email, nif, password, role });
+      await api.post('api/user/create', { fullname: name, email, nif, password, role });
       setSuccess('Registration successful! You can now log in.');
-      setError('');
+      setError(null);
     } catch (error) {
       setError('Registration failed. Please try again.');
       console.error('Registration failed:', error);
@@ -32,8 +34,6 @@ const RegisterPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">Register</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-center mb-4">{success}</p>}
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Full Name</label>
@@ -114,6 +114,21 @@ const RegisterPage = () => {
           <Link to="/login" className="text-blue-600 hover:text-blue-800">Login here</Link>
         </div>
       </div>
+      {/* Toast Notifications */}
+      {error && (
+        <Alert
+          message={error}
+          type="error"
+          onClose={() => setError(null)}
+        />
+      )}
+      {success && (
+        <Alert
+          message={success}
+          type="success"
+          onClose={() => setSuccess(null)}
+        />
+      )}
     </div>
   );
 };

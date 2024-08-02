@@ -19,6 +19,11 @@ const Layout = (props: { children: string | number | boolean | ReactElement<any,
   const handleLogout = () => { 
    
     navigate('/login');
+    localStorage.removeItem('balance')
+    localStorage.removeItem('userId')
+    localStorage.removeItem('token')
+    localStorage.removeItem('providerId')
+    localStorage.removeItem('role')
 
     logout()
 

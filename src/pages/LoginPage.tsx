@@ -21,7 +21,9 @@ const LoginPage = () => {
     try {
       const response = await api.post('/api/auth/signin', { email, password });
       localStorage.setItem('userId', response.data.user.id);
-      localStorage.setItem('providerId', response.data.user.providerId);
+      console.log(` saldo: ${response.data.user.balance}`)
+      localStorage.setItem('balance',response.data.user.balance)
+      localStorage.setItem('providerId', response.data.user.id);
       login(response.data.access_token, response.data.user.role);
 
       setSuccessMessage('Login successful!');

@@ -28,6 +28,7 @@ const Services: React.FC = () => {
     const { searchTerm } = useSearch();
     const userId = localStorage.getItem('userId');
 
+
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
         setAlertMessage(message);
         setAlertType(type);
@@ -71,7 +72,12 @@ const Services: React.FC = () => {
             const response = await api.get('api/service/checkBalance', {
                 params: { userId }
             });
-            return response.data.balance >= servicePrice;
+            
+
+            console.log(response.data.balance <= servicePrice)
+            console.log(response.data)
+            return response.data.balance >= servicePrice; 
+
         } catch (error) {
             console.error('Failed to check balance:', error);
             handleShowAlert('Failed to check balance.', 'error');
@@ -80,6 +86,10 @@ const Services: React.FC = () => {
     };
 
     const handleHireService = async (serviceId: string, servicePrice: number) => {
+        
+        console.log(serviceId)
+        console.log(servicePrice)
+
         const hasSufficientBalance = await checkUserBalance(servicePrice);
 
         if (!hasSufficientBalance) {
