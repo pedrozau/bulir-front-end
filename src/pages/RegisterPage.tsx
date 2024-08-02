@@ -2,7 +2,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import {Alert} from '../components/Alert'; // Importe o Toast
+import { Alert } from '../components/Alert'; // Importar o componente Alert
+import LoadingSpinner from '../components/LoadingSpinner'; // Importar o componente LoadingSpinner
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -13,6 +14,7 @@ const RegisterPage = () => {
   const [role, setRole] = useState('cliente'); // Default role
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); // Estado para carregar
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +22,7 @@ const RegisterPage = () => {
       setError('Passwords do not match');
       return;
     }
+    setLoading(true); // Iniciar carregamento
     try {
       await api.post('api/user/create', { fullname: name, email, nif, password, role });
       setSuccess('Registration successful! You can now log in.');
@@ -27,12 +30,19 @@ const RegisterPage = () => {
     } catch (error) {
       setError('Registration failed. Please try again.');
       console.error('Registration failed:', error);
+    } finally {
+      setLoading(false); // Parar carregamento
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
+      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg relative">
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
+            <LoadingSpinner />
+          </div>
+        )}
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">Register</h2>
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
@@ -114,7 +124,7 @@ const RegisterPage = () => {
           <Link to="/login" className="text-blue-600 hover:text-blue-800">Login here</Link>
         </div>
       </div>
-      {/* Toast Notifications */}
+      {/* Alert Notifications */}
       {error && (
         <Alert
           message={error}
