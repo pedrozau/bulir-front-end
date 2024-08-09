@@ -67,7 +67,7 @@ const Services: React.FC = () => {
 
             try {
                 const response = await api.get(`api/service/search/${searchTerm}`);
-                console.log(response.data);
+    
                 setSearchService(response.data);
             } catch (error) {
                 console.error('Failed to fetch search services:', error);
@@ -86,7 +86,7 @@ const Services: React.FC = () => {
         
         try {
             const response = await api.get(`api/user/getById/${clientId}`);
-            //setBalance(response.data.balance);
+            
             return response.data.balance >= servicePrice;
         } catch (error) {
             console.error('Failed to check balance:', error);
@@ -111,8 +111,8 @@ const Services: React.FC = () => {
                 serviceId,
             });
 
-            console.log('Service hired successfully:', response.data);
-             console.log(response.status);
+            console.log('Service hired successfully');
+             
             if (response.status === 201) {
                 setSuccessMessage('Service hired successfully!');
                 handleShowAlert('Service hired successfully!', 'success');
