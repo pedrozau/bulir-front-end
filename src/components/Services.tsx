@@ -1,4 +1,3 @@
-// src/pages/ServicesPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
@@ -16,6 +15,7 @@ interface Service {
 
 const Services: React.FC = () => {
     const [services, setServices] = useState<Service[]>([]);
+    const [searchService, setSearchService] = useState<Service[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -24,10 +24,11 @@ const Services: React.FC = () => {
     const [showAlert, setShowAlert] = useState<boolean>(false);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+    const [searchLoading, setSearchLoading] = useState<boolean>(false);
     const { userRole } = useAuth();
     const { searchTerm } = useSearch();
     const userId = localStorage.getItem('userId');
-
+    const [balance, setBalance] = useState<number>(0);
 
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
         setAlertMessage(message);
@@ -35,20 +36,6 @@ const Services: React.FC = () => {
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 3000);
     };
-
-    useEffect(() => {
-        const fetchServices = async () => {
-          try {
-            const response = await api.get(`api/service/search/${searchTerm}`);
-            console.log(response.data)
-            setServices(response.data);
-          } catch (error) {
-            console.error('Failed to fetch services:', error);
-          }
-        };
-    
-        fetchServices();
-      }, []);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -67,17 +54,38 @@ const Services: React.FC = () => {
         fetchServices();
     }, []);
 
+    useEffect(() => {
+        const fetchSearchServices = async () => {
+            if (searchTerm.trim() === '') {
+                setSearchService([]);
+                return;
+            }
+
+            setSearchLoading(true); // Começa o carregamento
+
+            try {
+                const response = await api.get(`api/service/search/${searchTerm}`);
+                console.log(response.data);
+                setSearchService(response.data);
+            } catch (error) {
+                console.error('Failed to fetch search services:', error);
+            } finally {
+                setSearchLoading(false); // Termina o carregamento
+            }
+        };
+
+        fetchSearchServices();
+    }, [searchTerm]);
+
+
+ 
     const checkUserBalance = async (servicePrice: number) => {
+
+        
         try {
-            const response = await api.get('api/service/checkBalance', {
-                params: { userId }
-            });
-            
-
-            console.log(response.data.balance <= servicePrice)
-            console.log(response.data)
-            return response.data.balance >= servicePrice; 
-
+            const response = await api.get(`api/user/getById/${userId}`);
+            setBalance(response.data.balance);
+            return response.data.balance >= servicePrice;
         } catch (error) {
             console.error('Failed to check balance:', error);
             handleShowAlert('Failed to check balance.', 'error');
@@ -86,11 +94,9 @@ const Services: React.FC = () => {
     };
 
     const handleHireService = async (serviceId: string, servicePrice: number) => {
-        
-        console.log(serviceId)
-        console.log(servicePrice)
-
         const hasSufficientBalance = await checkUserBalance(servicePrice);
+
+        console.log(serviceId)
 
         if (!hasSufficientBalance) {
             handleShowAlert('Insufficient balance', 'error');
@@ -98,12 +104,20 @@ const Services: React.FC = () => {
         }
 
         try {
-            await api.post('api/service/hire', {
-                userId,
+            const response = await api.post('api/service/hire', {
+                clientId:userId,
                 serviceId,
             });
-            setSuccessMessage('Service hired successfully!');
-            handleShowAlert('Service hired successfully!', 'success');
+
+            console.log('Service hired successfully:', response.data);
+             console.log(response.status);
+            if (response.status === 201) {
+                setSuccessMessage('Service hired successfully!');
+                handleShowAlert('Service hired successfully!', 'success');
+            } else {
+                handleShowAlert('Failed to hire service.', 'error');
+            }
+            
         } catch (error) {
             console.error('Failed to hire service:', error);
             handleShowAlert('Failed to hire service.', 'error');
@@ -165,53 +179,85 @@ const Services: React.FC = () => {
                 />
             )}
 
-            {userRole === 'cliente' ? (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Available Services</h2>
-                    <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
-                        <ul>
-                            {services.map((service) => (
-                                <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                                    <h3 className="text-xl font-semibold">{service.title}</h3>
-                                    <p>{service.description}</p>
-                                    <p className="text-gray-600">Price: ${service.price}</p>
-                                    <button
-                                        onClick={() => handleHireService(service.id, service.price)}
-                                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                        Hire Service
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+            {searchLoading ? (
+                <div className="flex justify-center items-center min-h-screen">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
                 </div>
-            ) : userRole === 'prestador' ? (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Your Services</h2>
-                    <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
-                        <ul>
-                            {services.filter(service => service.providerId === userId).map((service) => (
-                                <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
-                                    <h3 className="text-xl font-semibold">{service.title}</h3>
-                                    <p>{service.description}</p>
-                                    <p className="text-gray-600">Price: ${service.price}</p>
-                                    <button
-                                        onClick={() => handleEditService(service)}
-                                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                        Edit Service
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteService(service.id)}
-                                        className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                                        Delete Service
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
+            ) : searchTerm ? (
+                searchService.length > 0 ? (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Search Results</h2>
+                        <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                            <ul>
+                                {searchService.map((service) => (
+                                    <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                                        <h3 className="text-xl font-semibold">{service.title}</h3>
+                                        <p>{service.description}</p>
+                                        <p className="text-gray-600">Price: ${service.price}</p>
+                                        {userRole === 'cliente' && (
+                                            <button
+                                                onClick={() => handleHireService(service.id, service.price)}
+                                                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                                Hire Service
+                                            </button>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <p className="text-center text-gray-600">No services found for your search term.</p>
+                )
             ) : (
-                <p className="text-center text-gray-600">You are not authorized to view this content.</p>
+                userRole === 'cliente' ? (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Available Services</h2>
+                        <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                            <ul>
+                                {services.map((service) => (
+                                    <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                                        <h3 className="text-xl font-semibold">{service.title}</h3>
+                                        <p>{service.description}</p>
+                                        <p className="text-gray-600">Price: ${service.price}</p>
+                                        <button
+                                            onClick={() => handleHireService(service.id, service.price)}
+                                            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                            Hire Service
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                ) : userRole === 'prestador' ? (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Your Services</h2>
+                        <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
+                            <ul>
+                                {services.filter(service => service.providerId === userId).map((service) => (
+                                    <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
+                                        <h3 className="text-xl font-semibold">{service.title}</h3>
+                                        <p>{service.description}</p>
+                                        <p className="text-gray-600">Price: ${service.price}</p>
+                                        <button
+                                            onClick={() => handleEditService(service)}
+                                            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                            Edit Service
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteService(service.id)}
+                                            className="ml-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                            Delete Service
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="text-center text-gray-600">You are not authorized to view this content.</p>
+                )
             )}
 
             {/* Edit Service Modal */}

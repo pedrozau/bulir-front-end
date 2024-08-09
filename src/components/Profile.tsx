@@ -17,10 +17,15 @@ const Profile: React.FC = () => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<'success' | 'error'>('success'); // Tipo do alerta
   const { userRole } = useAuth();
+  const [balance, setBalance] = useState<number>(0);
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchUserData = async () => {
+      const getBalance = localStorage.getItem('balance');
+      if (getBalance) {
+        setBalance(parseFloat(getBalance));
+      }
       try {
         const userId = localStorage.getItem('userId');
         const userResponse = await api.get(`api/user/getById/${userId}`);
@@ -95,7 +100,7 @@ const Profile: React.FC = () => {
           <p><strong>Name:</strong> {userInfo.fullname}</p>
           <p><strong>Email:</strong> {userInfo.email}</p>
           <p><strong>NIF:</strong> {userInfo.nif}</p>
-          <p><strong>Balance:</strong>${Math.abs(userInfo.balance)}</p>
+          <p><strong>Balance:</strong>${balance}</p>
           {userRole === 'prestador' && (
             <>
               <p><strong>Provider ID:</strong> {userInfo.id}</p>
