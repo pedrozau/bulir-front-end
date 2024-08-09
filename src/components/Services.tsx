@@ -27,9 +27,11 @@ const Services: React.FC = () => {
     const [searchLoading, setSearchLoading] = useState<boolean>(false);
     const { userRole } = useAuth();
     const { searchTerm } = useSearch();
+    const [clientId, setclientId] = useState<string | null>(null);
     const userId = localStorage.getItem('userId');
     const [balance, setBalance] = useState<number>(0);
-
+   
+     setclientId(userId)
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
         setAlertMessage(message);
         setAlertType(type);
@@ -105,7 +107,7 @@ const Services: React.FC = () => {
 
         try {
             const response = await api.post('api/service/hire', {
-                clientId:userId,
+                clientId,
                 serviceId,
             });
 
