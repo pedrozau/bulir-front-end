@@ -27,11 +27,11 @@ const Services: React.FC = () => {
     const [searchLoading, setSearchLoading] = useState<boolean>(false);
     const { userRole } = useAuth();
     const { searchTerm } = useSearch();
-    const [clientId, setclientId] = useState<string | null>(null);
-    const userId = localStorage.getItem('userId');
-    const [balance, setBalance] = useState<number>(0);
+    
+    const clientId = localStorage.getItem('userId');
+    //const [balance, setBalance] = useState<number>(0);
    
-     setclientId(userId)
+  
     const handleShowAlert = (message: string, type: 'success' | 'error') => {
         setAlertMessage(message);
         setAlertType(type);
@@ -85,8 +85,8 @@ const Services: React.FC = () => {
 
         
         try {
-            const response = await api.get(`api/user/getById/${userId}`);
-            setBalance(response.data.balance);
+            const response = await api.get(`api/user/getById/${clientId}`);
+            //setBalance(response.data.balance);
             return response.data.balance >= servicePrice;
         } catch (error) {
             console.error('Failed to check balance:', error);
@@ -237,7 +237,7 @@ const Services: React.FC = () => {
                         <h2 className="text-2xl font-bold mb-4">Your Services</h2>
                         <div className="max-h-[calc(100vh-10rem)] overflow-y-auto">
                             <ul>
-                                {services.filter(service => service.providerId === userId).map((service) => (
+                                {services.filter(service => service.providerId === clientId).map((service) => (
                                     <li key={service.id} className="mb-4 p-4 border rounded-lg shadow-sm">
                                         <h3 className="text-xl font-semibold">{service.title}</h3>
                                         <p>{service.description}</p>
