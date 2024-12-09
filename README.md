@@ -1,6 +1,6 @@
-# Bulir Front-End
+# BulirService
 
-Bem-vindo ao repositório Bulir Front-End! Este projeto é uma aplicação web desenvolvida para [descrever a finalidade do seu projeto, por exemplo, "gerenciar serviços e interações entre clientes e prestadores de serviços"]. 
+Bem-vindo ao repositório BulirService! [ BulirService É uma aplicação web desenvolvida para gerenciar serviços e interações entre clientes e prestadores de serviços. Utilizando React e TypeScript, a aplicação oferece uma interface moderna e intuitiva para visualização e administração de serviços. O design responsivo e estilizado é garantido pelo uso do Tailwind CSS, proporcionando uma experiência de usuário fluida e agradável.]. 
 
 ## Capturas de Tela
 
